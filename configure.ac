@@ -13,8 +13,6 @@ AX_CXX_COMPILE_STDCXX_11(noext)
 
 
 AC_CONFIG_FILES(Makefile
-                php/Makefile
-                src/Makefile
-                gif/Makefile)
+                src/Makefile)
 
 AC_OUTPUT
