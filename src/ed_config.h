@@ -16,6 +16,14 @@ public:
   std::string assignment_text;
 
   std::string db_connection;
+
+  std::string email_notifier;
+
+  std::string smtp_server;
+
+  std::string smtp_user;
+
+  std::string smtp_password;
 };
 
 #endif

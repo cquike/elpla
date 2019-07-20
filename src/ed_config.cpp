@@ -28,6 +28,14 @@ ed_config::ed_config() :
     ("database.mysql.user", po::value<std::string>(), "mysql user")
     ("database.mysql.password", po::value<std::string>(), "mysql password")
     ("database.mysql.database", po::value<std::string>(), "mysql database")
+    ("notify.mail.email_notifier", po::value<std::string>(), 
+     "email address which sends notifications")
+    ("notify.mail.smtp_server", po::value<std::string>(), 
+     "SMTP server for the email account that sends notifications")
+    ("notify.mail.smtp_user", po::value<std::string>(), 
+     "SMTP user authentication for the email account that sends notifications")
+    ("notify.mail.smtp_password", po::value<std::string>(), 
+     "SMTP password authentication for the email account that sends notifications")
     ("notify.mail.availability_body", po::value<std::string>(), 
      "Default e-mail body for availability notifications")
     ("notify.mail.assignment_body", po::value<std::string>(), 
@@ -96,6 +104,14 @@ ed_config::ed_config() :
   std::ifstream ifs_assignment_body(assignment_body_file);
   assignment_text = std::string((std::istreambuf_iterator<char>(ifs_assignment_body)),
 	                        std::istreambuf_iterator<char>());
+
+  email_notifier = vm["notify.mail.email_notifier"].as<std::string>();
+
+  smtp_server = vm["notify.mail.smtp_server"].as<std::string>();
+
+  smtp_user= vm["notify.mail.smtp_user"].as<std::string>();
+
+  smtp_password= vm["notify.mail.smtp_password"].as<std::string>();
 }
 
 bool ed_config::check_file_permissions(const std::string& file)

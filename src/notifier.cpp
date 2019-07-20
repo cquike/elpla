@@ -5,11 +5,13 @@
 #include <vmime/vmime.hpp>
 #include <vmime/platforms/posix/posixHandler.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
+#include "ed_config.h"
 #include "notifier.h"
 
 
-notifier::notifier() :
-  m_cal_idx(0)
+notifier::notifier(const ed_config& config) :
+  m_cal_idx(0),
+  m_config(config)
 {
   vmime::platform::setHandler<vmime::platforms::posix::posixHandler>();
 }
@@ -54,7 +56,7 @@ bool notifier::enqueue_email
   text = std::regex_replace(text, std::regex("\\$Passwort"), eltern.password());
   email_to.push_back(eltern.email_mother());
   email_to.push_back(eltern.email_father());
-  email_cc.push_back("mafalda@engarda.org");
+  email_cc.push_back(m_config.email_notifier);
   std::vector<std::string> attachments;
 
   if(type == email_assign)
@@ -169,7 +171,7 @@ bool notifier::send_smtp(std::vector<std::string>& email_to,
   {
     vmime::messageBuilder mb;
 
-    mb.setExpeditor(vmime::mailbox("mafalda@engarda.org"));
+    mb.setExpeditor(vmime::mailbox(m_config.email_notifier));
 
     vmime::addressList to;
     for(auto& address_to : email_to)
@@ -206,11 +208,11 @@ bool notifier::send_smtp(std::vector<std::string>& email_to,
     vmime::ref <vmime::net::session> session = vmime::create< vmime::net::session >();
     vmime::ref <vmime::security::cert::defaultCertificateVerifier> vrf = 
       vmime::create <emptyCertificateVerifier>();
-    vmime::utility::url url("smtps://engarda-org.correoseguro.dinaserver.com");  // <== SMTP and not SMTP"S"
+    vmime::utility::url url(std::string("smtps://")+m_config.smtp_server);  // <== SMTP and not SMTP"S"
     vmime::ref <vmime::net::transport> tr = session->getTransport(url);
     tr->setProperty("connection.tls", true);
-    tr->setProperty("auth.username", "mafalda@engarda.org");
-    tr->setProperty("auth.password", "Iegh1ie5We");
+    tr->setProperty("auth.username", m_config.smtp_user);
+    tr->setProperty("auth.password", m_config.smpt_password);
     tr->setProperty("options.need-authentication", true);
     tr->setCertificateVerifier(vrf);
     tr->connect();
@@ -232,10 +234,10 @@ bool notifier::send_smtp(std::vector<std::string>& email_to,
 std::string notifier::create_icalendar_file(const shift& shift)
 {
   std::string icalendar_template =  
-"BEGIN:VCALENDAR\n"
+std::string("BEGIN:VCALENDAR\n"
 "VERSION:2.0\n"
 "BEGIN:VEVENT\n"
-"ORGANIZER;CN=\"Mafalda Elterndienst\":MAILTO:mafalda@engarda.org\n"
+"ORGANIZER;CN=\"Mafalda Elterndienst\":MAILTO:")+m_config.smtp_user+"\n"
 "DTSTAMP:$When_start\n"
 "DESCRIPTION: Mafalda Elterndienst $Morning_Afternoon\n"
 "SUMMARY: Mafalda Elterndienst $Morning_Afternoon\n"
