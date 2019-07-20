@@ -36,6 +36,7 @@ assignment_body=notify_assignment.txt
 
 The [database.mysql] entries contain the configuration to connect to the database. The [notify.mail] entries point to files that contain the default text used when sending emails to the kindergarten members.
 
+In the directory where the software is going to be executed:
 ```shell
 $ mkdir statistics`
 ```
