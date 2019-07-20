@@ -1,1 +1,1 @@
-SUBDIRS = php src gif
+SUBDIRS = src 
