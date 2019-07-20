@@ -117,7 +117,7 @@ void notify_parents(const parent_list& parents, const shift_list& shift_assignat
   month_period.shift(boost::gregorian::days(1)); //The last day is not considered part of the period
 
   //Initialize notifier
-  notifier notifier;
+  notifier notifier(config);
 
   //Loop on parents
   for(auto& parent : parents)
