@@ -17,14 +17,15 @@ $ make install
 
 Installation
 ============
-mkdir statistics
+
+$ mkdir statistics
 
 
 Start software
 ==============
-./src/ed_statistics --docroot statistics --http-address 0.0.0.0 --http-port 7070  --deploy-path /statistics &
+$ ./src/ed_statistics --docroot statistics --http-address 0.0.0.0 --http-port 7070  --deploy-path /statistics &
 
-./src/ed_holidays --docroot holidays --http-address 0.0.0.0 --http-port 9090 --deploy-path /holidays &
+$ ./src/ed_holidays --docroot holidays --http-address 0.0.0.0 --http-port 9090 --deploy-path /holidays &
 
-./src/ed_presence --docroot presence --http-address 0.0.0.0 --http-port 8080 --deploy-path /presence &
+$ ./src/ed_presence --docroot presence --http-address 0.0.0.0 --http-port 8080 --deploy-path /presence &
 
