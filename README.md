@@ -1,15 +1,19 @@
 Software prerequisites
 ======================
 
-In Debian 9
-apt install libboost-program-options-dev libboost-date-time-dev witty-dev libcppdb-dev libtool autoconf-archive libvmime-dev  libncurses5-dev automake
+In Debian 9:
+
+$ apt install libboost-program-options-dev libboost-date-time-dev witty-dev libcppdb-dev libtool autoconf-archive libvmime-dev  libncurses5-dev automake
 
 Compilation
 ===========
-./autogen.sh
-./configure
-make --prefix=installation_dir
-make install
+$ ./autogen.sh
+
+$ ./configure
+
+$ make --prefix=installation_dir
+
+$ make install
 
 Installation
 ============
