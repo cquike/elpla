@@ -212,7 +212,7 @@ bool notifier::send_smtp(std::vector<std::string>& email_to,
     vmime::ref <vmime::net::transport> tr = session->getTransport(url);
     tr->setProperty("connection.tls", true);
     tr->setProperty("auth.username", m_config.smtp_user);
-    tr->setProperty("auth.password", m_config.smpt_password);
+    tr->setProperty("auth.password", m_config.smtp_password);
     tr->setProperty("options.need-authentication", true);
     tr->setCertificateVerifier(vrf);
     tr->connect();
