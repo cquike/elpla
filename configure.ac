@@ -10,6 +10,11 @@ LT_INIT
 AC_SUBST(LIBTOOL_DEPS)
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11(noext)
+AC_LANG([C++])
+
+AC_CHECK_HEADERS([Wt/WApplication], [], [AC_MSG_ERROR([Couldn't find wt include files])])
+AC_CHECK_HEADERS([cppdb/frontend.h], [], [AC_MSG_ERROR([Couldn't find cppdb include files])])
+PKG_CHECK_MODULES(vmime, [vmime = 0.9.1])
 
 
 AC_CONFIG_FILES(Makefile
