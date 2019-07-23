@@ -2,14 +2,20 @@
 #define ED_CONFIG_H
 
 #include <string>
+#include <boost/program_options.hpp>
 
 class ed_config
 {
 private:
   bool check_file_permissions(const std::string& file);
+  boost::program_options::options_description config;
+  boost::program_options::variables_map vm;
 
 public:
   ed_config();
+
+  template<class T>
+  const T& get(const std::string& key) const;
 
   std::string availability_text;
 

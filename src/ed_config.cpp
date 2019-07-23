@@ -7,11 +7,27 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+template<class T>
+const T& ed_config::get(const std::string& key) const {
+  auto opt = vm[key];
+  if (opt.empty()) {
+    std::cout << "Missing configuration variable " << key;
+    auto const spec = config.find_nothrow(key, false);
+    if (spec) {
+      std::cout << ": " << spec->description();
+    }
+    std::cout << std::endl;
+    throw std::runtime_error("No key " + key + " in configuration.");
+  }
+
+  return opt.as<T>();
+}
 
 ed_config::ed_config() :
-  db_connection("mysql:"),
+  config("Configuration"),
   availability_text(),
-  assignment_text()
+  assignment_text(),
+  db_connection("mysql:")
 {
 
   std::string etcrc = "/etc/elpla/elpla.rc";
@@ -22,7 +38,6 @@ ed_config::ed_config() :
 
   std::string homerc = std::string(homedir)+"/.elpla/elpla.rc";
 
-  po::options_description config("Configuration");
   config.add_options()
     ("database.mysql.host", po::value<std::string>(), "mysql server host")
     ("database.mysql.user", po::value<std::string>(), "mysql user")
@@ -40,25 +55,38 @@ ed_config::ed_config() :
      "Default e-mail body for availability notifications")
     ("notify.mail.assignment_body", po::value<std::string>(), 
      "Default e-mail body for assignment notifications");
-  po::variables_map vm;
+
+  po::store(po::parse_environment(config, [] (std::string envstr){
+    if (envstr.size() < 3) {
+      return std::string();
+    };
+    if (envstr.substr(0, 3) != "ED_") {
+      return std::string();
+    };
+    std::string data = envstr.substr(3);
+    std::transform(data.begin(), data.end(), data.begin(),
+                   [](unsigned char c){ return (c == '_') ? '.' : std::tolower(c); });
+    return data;
+  }), vm);
 
   std::ifstream ifs_home(homerc);
   
   bool systemwide_config = false;
+  bool home_config = false;
 
   if (!ifs_home)
   {
-    systemwide_config = true;
     std::cout << "User config file "<<homerc<<" cannot be accessed. "
   	         "Trying user configuration file "<<etcrc<<std::endl;
     std::ifstream ifs_etc(etcrc);
+
     if (!ifs_etc)
-      throw std::runtime_error("No system-wide or user config file accessible");
+    {
+      std::cout << "Config file "<< etcrc <<" cannot be accessed." <<std::endl;
+    }
     else
     {
-      if(!check_file_permissions(etcrc))
-        throw std::runtime_error("Wrong permissions to configuration file. "
-		               "Only owner can have read permissions");
+      systemwide_config = true;
       po::store(parse_config_file(ifs_etc, config), vm);
     }
   }
@@ -66,42 +94,48 @@ ed_config::ed_config() :
   {
     if(!check_file_permissions(homerc))
       throw std::runtime_error("Wrong permissions to configuration file. "
-		               "Only owner can have read permissions");
+                               "Only owner can have read permissions");
+    home_config = true;
     po::store(parse_config_file(ifs_home, config), vm);
   }
 
   po::notify(vm);
 
-  std::string mysql_host = vm["database.mysql.host"].as<std::string>();
-  std::string mysql_user = vm["database.mysql.user"].as<std::string>();
-  std::string mysql_passwd = vm["database.mysql.password"].as<std::string>();
-  std::string mysql_database = vm["database.mysql.database"].as<std::string>();
+  std::string mysql_host = get<std::string>("database.mysql.host");
+  std::string mysql_user = get<std::string>("database.mysql.user");
+  std::string mysql_passwd = get<std::string>("database.mysql.password");
+  std::string mysql_database = get<std::string>("database.mysql.database");
 
   db_connection += "host="+mysql_host+";user="+mysql_user+";password="+
 	           mysql_passwd+";set_charset_name=utf8;database="+mysql_database;
 
   std::string availability_body_file;
   std::string assignment_body_file;
+  std::string prefix;
+
   if(systemwide_config)
   {
-    availability_body_file = std::string("/etc/elpla/")+
-      vm["notify.mail.availability_body"].as<std::string>();
-    assignment_body_file = std::string("/etc/elpla/")+
-      vm["notify.mail.assignment_body"].as<std::string>();
+    prefix = std::string("/etc/elpla/");
   }
-  else
+  else if (home_config)
   {
-    availability_body_file = std::string(homedir)+"/.elpla/"+
-      vm["notify.mail.availability_body"].as<std::string>();
-    assignment_body_file = std::string(homedir)+"/.elpla/"+
-      vm["notify.mail.assignment_body"].as<std::string>();
+    prefix = std::string(homedir)+"/.elpla/";
   }
+
+  availability_body_file = prefix + get<std::string>("notify.mail.availability_body");
+  assignment_body_file = prefix + get<std::string>("notify.mail.assignment_body");
     
   std::ifstream ifs_availability_body(availability_body_file);
+  if (!ifs_availability_body) {
+    throw std::runtime_error("Cannot open file for reading " + availability_body_file);
+  }
   availability_text = std::string((std::istreambuf_iterator<char>(ifs_availability_body)),
 		                  std::istreambuf_iterator<char>());
-  
+
   std::ifstream ifs_assignment_body(assignment_body_file);
+  if (!ifs_assignment_body) {
+    throw std::runtime_error("Cannot open file for reading " + assignment_body_file);
+  }
   assignment_text = std::string((std::istreambuf_iterator<char>(ifs_assignment_body)),
 	                        std::istreambuf_iterator<char>());
 
