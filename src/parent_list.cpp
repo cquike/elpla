@@ -40,4 +40,5 @@ bool from_db(parent_list& parent_list, const std::string& db_connection)
                              email_mother, email_father, password, visit_hours,
                              membership_period);
   }
+  return true;
 }
