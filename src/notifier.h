@@ -1,5 +1,5 @@
 #ifndef NOTIFIER_H
-#define NOTIGIER_H
+#define NOTIFIER_H
 
 #include <vector>
 #include <future>
