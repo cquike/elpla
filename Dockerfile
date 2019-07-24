@@ -4,7 +4,6 @@ RUN apt-get update -y && apt-get install -y libboost-program-options-dev libboos
 
 RUN mkdir /elpla
 COPY . /elpla
-
 WORKDIR /elpla
 
 RUN ./autogen.sh
@@ -13,15 +12,15 @@ RUN ./autogen.sh
 
 FROM debian:9.9
 
-RUN apt-get update -y && apt-get install -y libwt-common libcppdb-mysql0 libvmime0 locales
+RUN apt-get update -y && apt-get install -y libwt-common libcppdb-mysql0 libvmime0 locales supervisor nginx-light
+
 
 RUN localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE.UTF-8
 ENV LANG de_DE.utf8
 
-RUN groupadd -r elpla && useradd --no-log-init -r -m -g elpla elpla
-USER elpla
-WORKDIR /home/elpla
 
+RUN groupadd -r elpla && useradd --no-log-init -r -m -g elpla elpla
+WORKDIR /home/elpla
 
 RUN mkdir -p .elpla statics/resources/themes/bootstrap presence holidays statistics
 
@@ -36,3 +35,13 @@ COPY --from=build /elpla/src/ed_notify .
 COPY --from=build /elpla/src/ed_holidays .
 COPY --from=build /elpla/src/ed_presence .
 COPY --from=build /elpla/src/ed_statistics .
+
+
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+
+
+COPY supervisord.conf /etc/supervisord.conf
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
