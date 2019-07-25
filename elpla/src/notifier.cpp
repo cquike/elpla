@@ -208,7 +208,7 @@ bool notifier::send_smtp(std::vector<std::string>& email_to,
     vmime::ref <vmime::net::session> session = vmime::create< vmime::net::session >();
     vmime::ref <vmime::security::cert::defaultCertificateVerifier> vrf = 
       vmime::create <emptyCertificateVerifier>();
-    vmime::utility::url url(std::string("smtps://")+m_config.smtp_server);  // <== SMTP and not SMTP"S"
+    vmime::utility::url url(m_config.smtp_server);
     vmime::ref <vmime::net::transport> tr = session->getTransport(url);
     tr->setProperty("connection.tls", true);
     tr->setProperty("auth.username", m_config.smtp_user);
