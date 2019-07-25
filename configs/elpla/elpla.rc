@@ -7,3 +7,7 @@ database=elpla
 [notify.mail]
 availability_body=avail.msg
 assignment_body=assign.msg
+email_notifier=
+smtp_server=
+smtp_user=
+smtp_password=

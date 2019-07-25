@@ -139,13 +139,13 @@ ed_config::ed_config() :
   assignment_text = std::string((std::istreambuf_iterator<char>(ifs_assignment_body)),
 	                        std::istreambuf_iterator<char>());
 
-  email_notifier = vm["notify.mail.email_notifier"].as<std::string>();
+  email_notifier = get<std::string>("notify.mail.email_notifier");
 
-  smtp_server = vm["notify.mail.smtp_server"].as<std::string>();
+  smtp_server = get<std::string>("notify.mail.smtp_server");
 
-  smtp_user= vm["notify.mail.smtp_user"].as<std::string>();
+  smtp_user= get<std::string>("notify.mail.smtp_user");
 
-  smtp_password= vm["notify.mail.smtp_password"].as<std::string>();
+  smtp_password= get<std::string>("notify.mail.smtp_password");
 }
 
 bool ed_config::check_file_permissions(const std::string& file)
