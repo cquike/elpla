@@ -3,10 +3,10 @@ FROM debian:9.9 AS build
 RUN apt-get update -y && apt-get install -y libboost-program-options-dev libboost-date-time-dev libwt-dev libcppdb-dev libtool autoconf-archive libvmime-dev libncurses5-dev automake g++ make
 
 RUN mkdir /elpla
-COPY . /elpla
+COPY elpla /elpla
 WORKDIR /elpla
 
-RUN ./autogen.sh
+RUN ./autogen.sh && ./configure && make
 
 
 
@@ -28,13 +28,14 @@ ENV LANG de_DE.utf8
 RUN groupadd -r elpla && useradd --no-log-init -r -m -g elpla elpla
 WORKDIR /home/elpla
 
+COPY statics statics
+
 RUN mkdir -p .elpla statics/resources/themes/bootstrap presence holidays statistics
 
-COPY --chown=elpla --from=build /elpla/defaults/* .elpla/
+COPY --chown=elpla configs/elpla/* .elpla/
 
 RUN chmod 400 .elpla/elpla.rc
 
-COPY --from=build /elpla/css statics/css
 COPY --from=build /usr/share/Wt/resources statics/resources
 
 COPY --from=build /elpla/src/ed_notify .
@@ -45,14 +46,13 @@ COPY --from=build /elpla/src/ed_statistics .
 COPY configs/php-fpm /etc/php/7.0/fpm/
 RUN sed -e 's/^pid\s*=.*/;pid=none/'  -i /etc/php/7.0/fpm/php-fpm.conf
 
-COPY php/availability.php /var/www/availability.php
-COPY resources statics
+COPY elpla/src/availability.php /var/www/availability.php
 
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY configs/nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
 
-COPY supervisord.conf /etc/supervisord.conf
+COPY configs/supervisord/supervisord.conf /etc/supervisord.conf
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
