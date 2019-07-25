@@ -12,7 +12,13 @@ RUN ./autogen.sh
 
 FROM debian:9.9
 
-RUN apt-get update -y && apt-get install -y libwt-common libcppdb-mysql0 libvmime0 locales supervisor nginx-light
+RUN apt-get update -y && \
+    apt-get install -y \
+        libwt-common libcppdb-mysql0 libvmime0\
+        locales\
+        supervisor\
+        nginx-light\
+        php-fpm php-mysqli php-mbstring php-xml
 
 
 RUN localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE.UTF-8
@@ -36,6 +42,11 @@ COPY --from=build /elpla/src/ed_holidays .
 COPY --from=build /elpla/src/ed_presence .
 COPY --from=build /elpla/src/ed_statistics .
 
+COPY configs/php-fpm /etc/php/7.0/fpm/
+RUN sed -e 's/^pid\s*=.*/;pid=none/'  -i /etc/php/7.0/fpm/php-fpm.conf
+
+COPY php/availability.php /var/www/availability.php
+COPY resources statics
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
