@@ -1,25 +1,52 @@
 <?php
 setlocale(LC_ALL, 'de_DE.UTF-8');
-$PW=$_GET["PW"];
 
-$MasterPW="SanJuan";
-if (in_array("ED_MASTER_PWD", $_ENV)) {
-  $MasterPW=$_ENV["ED_MASTER_PWD"];
+$PW="";
+if (array_key_exists("PW", $_GET)) {
+ $PW = $_GET["PW"];
 }
 
-/*
-if (($inifile = parse_ini_file($_ENV['HOME']."/.elpla/elpla.rc", TRUE))) {
-   if (in_array("database.mysql", $inifile)) {
-      $dbopts = $inifile["database.mysql"];
-      if (in_array("host", $dbopts)) {
-         
+$config = array(
+  "master.pwd" => "elpla",
+  "database.mysql.host" => "localhost",
+  "database.mysql.user" => "elpla",
+  "database.mysql.password" => "elpla",
+  "database.mysql.database" => "elpla",
+);
+
+function load_rc($filename, &$config) {
+  if (!file_exists($filename)) {
+    return ;
+  }
+  if (($inifile = parse_ini_file($filename, TRUE))) {
+    foreach($inifile as $sectionkey => $sectionvalue) {
+      foreach($sectionvalue as $key => $value) {
+        $config[$sectionkey . "." . $key] = $value;
       }
-   }
+    }
+  }
 }
-$mysqli = new mysqli("localhost", "mafalda", "omkeiR0phaCa9cha", "mafalda");
-*/
 
-$mysqli = new mysqli($_ENV["ED_DATABASE_MYSQL_HOST"], "elpla", "elpla", "elpla");
+load_rc("/etc/elpla.rc", $config);
+if (array_key_exists("HOME", $_ENV)) {
+  load_rc($_ENV["HOME"]."/.elpla/elpla.rc", $config);
+}
+
+foreach($_ENV as $key => $value) {
+  $norkey = strtolower(str_replace("_", ".", $key));
+  if (substr($norkey, 0, 3) === "ed.") {
+    $config[substr($norkey, 3)] = $value;
+  }
+}
+
+$MasterPW=$config["master.pwd"];
+
+$mysqli = new mysqli(
+   $config["database.mysql.host"],
+   $config["database.mysql.user"],
+   $config["database.mysql.password"],
+   $config["database.mysql.database"]
+);
 
 $Admin=false;
 if ($PW == $MasterPW)
@@ -37,12 +64,6 @@ function Nullen($Zahl, $AnzahlNullen)
     $Temp="0" + $Temp;
   }
   return $Temp;
-}
-
-function SQLDate($Datum)
-{
-  $_retval=Nullen(Year[$Datum], 4) + "-" + Nullen(Month[$Datum], 2) + "-" + Nullen(Day[$Datum], 2); // WARNING: assuming Year is an external array assuming Month is an external array assuming Day is an external array
-  return $_retval;
 }
 
 //Startdatum auf den naechsten Monatsersten setzen
