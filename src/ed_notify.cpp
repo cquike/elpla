@@ -9,7 +9,8 @@
 
 //TODO: i18n
 
-void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, std::string& email_body_template);
+void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, 
+		    std::string& email_body_template, const ed_config& config);
 
 int main(int argc, char *argv[])
 {
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
       body_text_template=config.availability_text;
     else if(etype==email_assign)
       body_text_template=config.assignment_text;
-    notify_parents(parents, shift_assignations, etype, body_text_template);
+    notify_parents(parents, shift_assignations, etype, body_text_template, config);
   }
   catch(std::exception& e) 
   {
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
   }
 }
 
-void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, std::string& email_body_template)
+void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, std::string& email_body_template, const ed_config& config)
 {
   //Get the date
   boost::gregorian::date current_month = boost::gregorian::day_clock::local_day();
@@ -117,7 +118,7 @@ void notify_parents(const parent_list& parents, const shift_list& shift_assignat
   month_period.shift(boost::gregorian::days(1)); //The last day is not considered part of the period
 
   //Initialize notifier
-  notifier notifier;
+  notifier notifier(config);
 
   //Loop on parents
   for(auto& parent : parents)

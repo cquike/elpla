@@ -17,7 +17,7 @@ class notifier
 
   public:
   
-  notifier();
+  notifier(const ed_config& config);
 
   ~notifier();
 
@@ -59,6 +59,7 @@ class notifier
 
   std::string m_temp_dir;
   int m_cal_idx;
+  const ed_config& m_config;
 };
 
 class emptyCertificateVerifier : public vmime::security::cert::defaultCertificateVerifier
