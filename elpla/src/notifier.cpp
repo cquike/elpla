@@ -72,6 +72,7 @@ bool notifier::enqueue_email
 
   if (m_dry) {
     std::cout << "Eid: " << eltern.id() << std::endl
+              << "Subject: " << email_subject << std::endl
               << "To: " << eltern.email_mother() << ", " << eltern.email_father() << std::endl
               << text << std::endl << std::endl;
     return true;
@@ -175,6 +176,37 @@ void notifier::print_final_status()
   }
 }
 
+static std::ostream& operator<<(std::ostream& os, const vmime::exception& e) {
+  os << "vmime::exceptions::" << e.name() << "{what='" << e.what() << "'";
+  // More information for special exceptions
+  if (dynamic_cast <const vmime::exceptions::command_error*>(&e)) {
+    const auto& ce = dynamic_cast <const vmime::exceptions::command_error&>(e);
+    os << ",command='" << ce.command() << "'";
+    os << ",response='" << ce.response() << "'";
+  }
+  if (dynamic_cast <const vmime::exceptions::invalid_response*>(&e)) {
+    const auto& ir = dynamic_cast <const vmime::exceptions::invalid_response&>(e);
+    os << ",response='" << ir.response() << "'";
+  }
+  if (dynamic_cast <const vmime::exceptions::connection_greeting_error*>(&e)) {
+    const auto& cge = dynamic_cast <const vmime::exceptions::connection_greeting_error&>(e);
+    os << ",response='" << cge.response() << "'";
+  }
+  if (dynamic_cast <const vmime::exceptions::authentication_error*>(&e)) {
+    const auto& ae = dynamic_cast <const vmime::exceptions::authentication_error&>(e);
+    os << ",response='" << ae.response() << "'";
+  }
+  if (dynamic_cast <const vmime::exceptions::filesystem_exception*>(&e)) {
+    const auto& fe = dynamic_cast <const vmime::exceptions::filesystem_exception&>(e);
+    os << ",path='" << vmime::platform::getHandler()->getFileSystemFactory()->pathToString(fe.path()) << "'";
+  }
+  if (e.other()) {
+    os << ",other=" << *e.other();
+  }
+  os << "}";
+  return os;
+}
+
 bool notifier::send_smtp(std::vector<std::string>& email_to, 
                          std::vector<std::string>& email_cc, 
                          std::string& subject, 
@@ -236,6 +268,14 @@ bool notifier::send_smtp(std::vector<std::string>& email_to,
     sleep(100);
   }
   catch (vmime::exception& e)
+  {
+    std::ostringstream error_msg;
+    error_msg << e;
+    m_error_messages.push_back(error_msg.str());
+    sleep(100);
+    return false;
+  }
+  catch (std::exception& e)
   {
     m_error_messages.push_back(e.what());
     sleep(100);
