@@ -1,13 +1,13 @@
 Liebe $Name_Mutter, lieber $Name_Vater,
 
 
-bitte tragt eure Verfügbarkeit für Elterndienste im kommenden Monat bis 28.06.2019 ein. Dazu steht euch folgender Link zur Verfügung:
+bitte tragt eure Verfügbarkeit für Elterndienste im kommenden Monat bis 28.08.2019 ein. Dazu steht euch folgender Link zur Verfügung:
 
-https://mafalda.engarda.org/availability.php?PW=$Passwort
+$SystemUrl/?PW=$Passwort
 
 Dazu noch einige Erklärungen:
 - Um alle Vormittage gut abdecken zu können, bitte mindesten 2 Vormittage pro Monat Verfügbarkeit angeben.
-- Urlaube sind mit grau markiert. Um neue Urlaube einzutragen bzw editieren, bitte benutzen den Link https://mafalda.engarda.org/holidays?PW=$Passwort
+- Urlaube sind mit grau markiert. Um neue Urlaube einzutragen bzw editieren, bitte benutzen den Link $SystemUrl/holidays?PW=$Passwort
 - Es ist ein Kalender zu sehen, in dem Verfügbarkeiten in grün und Abwesenheiten in rot dargestellt werden.
 - Dabei stellt das obere Feld an einem Tag den Vormittag, das untere Feld den Nachmittag dar.
 - Ihr seht die Verfügbarkeit aller Eltern, könnt aber nur eure eigene editieren.
@@ -20,5 +20,4 @@ Für Anregungen und Rückfragen stehen wir euch natürlich gerne zur Verfügung.
 
 Viele Grüße,
 
-Débora y Enrique
-
+$SystemMainteners

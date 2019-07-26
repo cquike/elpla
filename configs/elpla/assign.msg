@@ -2,7 +2,8 @@ Liebe $Name_Mutter, lieber $Name_Vater,
 
 
 der aktuelle Elterndienstplan ist unter folgendem Link zu finden:
-https://mafalda.engarda.org/availability.php?PW=$Passwort
+
+$SystemUrl/?PW=$Passwort
 
 Dazu noch einige Erklärungen:
 - Verpflichtende Elterndienste sind in gelber Farbe gekennzeichnet.
@@ -15,4 +16,4 @@ Dazu noch einige Erklärungen:
 
 Viele Grüße,
 
-Débora y Enrique
+$SystemMainteners

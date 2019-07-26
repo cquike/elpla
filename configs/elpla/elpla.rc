@@ -1,3 +1,7 @@
+[system]
+url=https://example.com
+mainteners=Elterndienst
+
 [database.mysql]
 host=localhost
 user=elpla

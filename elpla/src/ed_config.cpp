@@ -25,8 +25,6 @@ const T& ed_config::get(const std::string& key) const {
 
 ed_config::ed_config() :
   config("Configuration"),
-  availability_text(),
-  assignment_text(),
   db_connection("mysql:")
 {
 
@@ -39,6 +37,8 @@ ed_config::ed_config() :
   std::string homerc = std::string(homedir)+"/.elpla/elpla.rc";
 
   config.add_options()
+    ("system.url", po::value<std::string>(), "system base url")
+    ("system.mainteners", po::value<std::string>(), "names of system mainteners")
     ("master.pwd", po::value<std::string>(), "master user password")
     ("database.mysql.host", po::value<std::string>(), "mysql server host")
     ("database.mysql.user", po::value<std::string>(), "mysql user")
@@ -109,6 +109,9 @@ ed_config::ed_config() :
 
   db_connection += "host="+mysql_host+";user="+mysql_user+";password="+
 	           mysql_passwd+";set_charset_name=utf8;database="+mysql_database;
+
+  system_url = get<std::string>("system.url");
+  system_mainteners = get<std::string>("system.mainteners");
 
   std::string availability_body_file;
   std::string assignment_body_file;

@@ -59,6 +59,8 @@ bool notifier::enqueue_email
   text = std::regex_replace(text, std::regex("\\$Name_Mutter"), eltern.name_mother());
   text = std::regex_replace(text, std::regex("\\$Name_Vater"), eltern.name_father());
   text = std::regex_replace(text, std::regex("\\$Passwort"), eltern.password());
+  text = std::regex_replace(text, std::regex("\\$SystemUrl"), m_config.system_url);
+  text = std::regex_replace(text, std::regex("\\$SystemMainteners"), m_config.system_mainteners);
   email_to.push_back(eltern.email_mother());
   email_to.push_back(eltern.email_father());
   email_cc.push_back(m_config.email_notifier);

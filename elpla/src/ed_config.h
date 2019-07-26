@@ -17,11 +17,15 @@ public:
   template<class T>
   const T& get(const std::string& key) const;
 
+  std::string db_connection;
+
+  std::string system_url;
+
+  std::string system_mainteners;
+
   std::string availability_text;
 
   std::string assignment_text;
-
-  std::string db_connection;
 
   std::string email_notifier;
 
