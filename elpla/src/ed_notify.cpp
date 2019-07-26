@@ -10,7 +10,7 @@
 //TODO: i18n
 
 void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, 
-		    std::string& email_body_template, const ed_config& config);
+		    std::string& email_body_template, const std::string& subject, bool dry, const ed_config& config);
 
 int main(int argc, char *argv[])
 {
@@ -20,18 +20,21 @@ int main(int argc, char *argv[])
     boost::program_options::options_description desc("Allowed options");
     desc.add_options()
             ("help", "produce help message")
-            ("getavailtext,a", 
-             "print default email content for filling availability")
-            ("getassigntext,s", 
-             "print default email content for notifying assignations")
             ("setavailtext,v", boost::program_options::value<std::string>(), 
              "set email content for filling availability from file") 
             ("setassigntext,t", boost::program_options::value<std::string>(),
              "set email content for notifying assignations from file")
+            ("subject,s", boost::program_options::value<std::string>(),
+             "set email subject")
+            ("eid,e", boost::program_options::value<std::vector<int> >(),
+             "send emails only to some eltern id")
             ("sendavail,l", 
              "send email for filling availability")
             ("sendassign,n", 
-             "send email for notifying assignations");
+             "send email for notifying assignations")
+            ("dry,d",
+             "just print emails to standard output, do not send them")
+            ;
 
     boost::program_options::variables_map vm;        
     boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -45,16 +48,6 @@ int main(int argc, char *argv[])
 
     //Read options
     email_type etype;
-    if(vm.count("getavailtext")) 
-    {
-      std::cout<<config.availability_text<<std::endl;
-      return 0;
-    }
-    if(vm.count("getassigntext"))
-    {
-      std::cout<<config.assignment_text<<std::endl;
-      return 0;
-    }
     if(vm.count("setavailtext"))
     {
       std::ifstream ifs(vm["setavailtext"].as<std::string>());
@@ -74,6 +67,7 @@ int main(int argc, char *argv[])
     else //TODO: Disallow setting both
     {
       std::cout<<"At least one option --sendavail or --sendassign must be set"<<std::endl;
+      return 1;
     }
 
 
@@ -83,6 +77,21 @@ int main(int argc, char *argv[])
     from_db(parents, config.db_connection);
     from_db(shift_assignations, config.db_connection);
 
+    if(vm.count("eid"))
+    {
+      std::vector<int> eids = vm["eid"].as<std::vector<int>>();
+      for( auto it = parents.begin(); it != parents.end(); )
+      {
+        if(std::find(eids.begin(), eids.end(), it->first) != eids.end() )
+        {
+          ++it;
+        }
+        else
+        {
+          it = parents.erase(it);
+        }
+      }
+    }
 
     //Send the emails
     std::string body_text_template;
@@ -90,7 +99,8 @@ int main(int argc, char *argv[])
       body_text_template=config.availability_text;
     else if(etype==email_assign)
       body_text_template=config.assignment_text;
-    notify_parents(parents, shift_assignations, etype, body_text_template, config);
+    std::string subject = vm.count("subject") ? vm["subject"].as<std::string>() : "";
+    notify_parents(parents, shift_assignations, etype, body_text_template, subject, vm.count("dry")>0, config);
   }
   catch(std::exception& e) 
   {
@@ -103,7 +113,7 @@ int main(int argc, char *argv[])
   }
 }
 
-void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, std::string& email_body_template, const ed_config& config)
+void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, std::string& email_body_template, const std::string& subject, bool dry, const ed_config& config)
 {
   //Get the date
   boost::gregorian::date current_month = boost::gregorian::day_clock::local_day();
@@ -118,7 +128,7 @@ void notify_parents(const parent_list& parents, const shift_list& shift_assignat
   month_period.shift(boost::gregorian::days(1)); //The last day is not considered part of the period
 
   //Initialize notifier
-  notifier notifier(config);
+  notifier notifier(config, dry);
 
   //Loop on parents
   for(auto& parent : parents)
@@ -135,7 +145,7 @@ void notify_parents(const parent_list& parents, const shift_list& shift_assignat
       std::for_each(shift_assignations.begin(), shift_assignations.end(), select_shifts);
 
       std::cout<<" Queueing email to "<<parent.second.name_kid()<<std::endl;
-      notifier.enqueue_email(etype, target_month, parent.second, email_body_template, this_parent_shifts);
+      notifier.enqueue_email(etype, target_month, parent.second, email_body_template, subject, this_parent_shifts);
     } 
  }
 

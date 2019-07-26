@@ -9,8 +9,9 @@
 #include "notifier.h"
 
 
-notifier::notifier(const ed_config& config) :
+notifier::notifier(const ed_config& config, bool dry) :
   m_cal_idx(0),
+  m_dry(dry),
   m_config(config)
 {
   vmime::platform::setHandler<vmime::platforms::posix::posixHandler>();
@@ -33,7 +34,8 @@ bool notifier::enqueue_email
 (email_type type, 
  boost::gregorian::date date, 
  const eltern& eltern, 
- std::string& body_text,
+ const std::string& body_text,
+ const std::string& subject,
  const shift_list& shifts)
 {
   std::locale::global(std::locale("de_DE.utf8"));
@@ -45,11 +47,14 @@ bool notifier::enqueue_email
   char month_c[100];
   std::tm date_tm = boost::gregorian::to_tm(date);
   std::strftime(month_c, 99, "%B %Y", &date_tm);
-  std::string subject; 
-  if(type == email_assign)
-    subject = std::string("Elterndienste ") + month_c; 
-  else 
-    subject = std::string("Elterndienste ") + month_c; 
+  std::string email_subject;
+  if (!subject.empty()) {
+    email_subject = subject;
+  } else if (type == email_assign) {
+    email_subject = std::string("Elterndienste ") + month_c;
+  } else {
+    email_subject = std::string("Elterndienste ") + month_c;
+  }
   std::string text = body_text; 
   text = std::regex_replace(text, std::regex("\\$Name_Mutter"), eltern.name_mother());
   text = std::regex_replace(text, std::regex("\\$Name_Vater"), eltern.name_father());
@@ -63,9 +68,16 @@ bool notifier::enqueue_email
     for(auto& shift : shifts)
       attachments.push_back(create_icalendar_file(shift));
 
+  if (m_dry) {
+    std::cout << "Eid: " << eltern.id() << std::endl
+              << "To: " << eltern.email_mother() << ", " << eltern.email_father() << std::endl
+              << text << std::endl << std::endl;
+    return true;
+  }
+
   m_sending_email_tasks.push_back
     (std::packaged_task<bool()>
-       (std::bind(&notifier::send_smtp, this, email_to, email_cc, subject, text, attachments)));
+       (std::bind(&notifier::send_smtp, this, email_to, email_cc, email_subject, text, attachments)));
   m_sending_email_futures.push_back(m_sending_email_tasks.back().get_future());
   return true;
 }

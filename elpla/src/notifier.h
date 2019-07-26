@@ -17,14 +17,15 @@ class notifier
 
   public:
   
-  notifier(const ed_config& config);
+  notifier(const ed_config& config, bool dry);
 
   ~notifier();
 
   bool enqueue_email(email_type type, 
                      boost::gregorian::date date, 
                      const eltern& eltern, 
-                     std::string& body_text,
+                     const std::string& body_text,
+                     const std::string& subject,
                      const shift_list& shifts = shift_list());
 
   void start_sending();
@@ -40,7 +41,7 @@ class notifier
   bool send_smtp(std::vector<std::string>& email_to, 
                  std::vector<std::string>& email_cc, 
                  std::string& subject, 
-                 std::string& text, 
+                 std::string& text,
                  std::vector<std::string>& attachments);
 
   std::string create_icalendar_file(const shift& shift);
@@ -59,6 +60,7 @@ class notifier
 
   std::string m_temp_dir;
   int m_cal_idx;
+  bool m_dry;
   const ed_config& m_config;
 };
 
