@@ -39,21 +39,22 @@ ed_config::ed_config() :
   std::string homerc = std::string(homedir)+"/.elpla/elpla.rc";
 
   config.add_options()
+    ("master.pwd", po::value<std::string>(), "master user password")
     ("database.mysql.host", po::value<std::string>(), "mysql server host")
     ("database.mysql.user", po::value<std::string>(), "mysql user")
     ("database.mysql.password", po::value<std::string>(), "mysql password")
     ("database.mysql.database", po::value<std::string>(), "mysql database")
-    ("notify.mail.email_notifier", po::value<std::string>(), 
+    ("notify.mail.notifier", po::value<std::string>(),
      "email address which sends notifications")
-    ("notify.mail.smtp_server", po::value<std::string>(), 
+    ("notify.mail.smtp.server", po::value<std::string>(),
      "SMTP server for the email account that sends notifications")
-    ("notify.mail.smtp_user", po::value<std::string>(), 
+    ("notify.mail.smtp.user", po::value<std::string>(),
      "SMTP user authentication for the email account that sends notifications")
-    ("notify.mail.smtp_password", po::value<std::string>(), 
+    ("notify.mail.smtp.password", po::value<std::string>(),
      "SMTP password authentication for the email account that sends notifications")
-    ("notify.mail.availability_body", po::value<std::string>(), 
+    ("notify.mail.availability.body", po::value<std::string>(),
      "Default e-mail body for availability notifications")
-    ("notify.mail.assignment_body", po::value<std::string>(), 
+    ("notify.mail.assignment.body", po::value<std::string>(),
      "Default e-mail body for assignment notifications");
 
   po::store(po::parse_environment(config, [] (std::string envstr){
@@ -122,8 +123,8 @@ ed_config::ed_config() :
     prefix = std::string(homedir)+"/.elpla/";
   }
 
-  availability_body_file = prefix + get<std::string>("notify.mail.availability_body");
-  assignment_body_file = prefix + get<std::string>("notify.mail.assignment_body");
+  availability_body_file = prefix + get<std::string>("notify.mail.availability.body");
+  assignment_body_file = prefix + get<std::string>("notify.mail.assignment.body");
     
   std::ifstream ifs_availability_body(availability_body_file);
   if (!ifs_availability_body) {
@@ -139,13 +140,13 @@ ed_config::ed_config() :
   assignment_text = std::string((std::istreambuf_iterator<char>(ifs_assignment_body)),
 	                        std::istreambuf_iterator<char>());
 
-  email_notifier = get<std::string>("notify.mail.email_notifier");
+  email_notifier = get<std::string>("notify.mail.notifier");
 
-  smtp_server = get<std::string>("notify.mail.smtp_server");
+  smtp_server = get<std::string>("notify.mail.smtp.server");
 
-  smtp_user= get<std::string>("notify.mail.smtp_user");
+  smtp_user= get<std::string>("notify.mail.smtp.user");
 
-  smtp_password= get<std::string>("notify.mail.smtp_password");
+  smtp_password= get<std::string>("notify.mail.smtp.password");
 }
 
 bool ed_config::check_file_permissions(const std::string& file)

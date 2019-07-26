@@ -5,9 +5,10 @@ password=elpla
 database=elpla
 
 [notify.mail]
-availability_body=avail.msg
-assignment_body=assign.msg
-email_notifier=elpla@example.com
-smtp_server=smtps://smtp.example.com:465
-smtp_user=user
-smtp_password=password
+availability.body=avail.msg
+assignment.body=assign.msg
+
+notifier=elpla@example.com
+smtp.server=smtps://smtp.example.com:465
+smtp.user=user
+smtp.password=password
