@@ -9,7 +9,7 @@ namespace po = boost::program_options;
 
 template<class T>
 const T& ed_config::get(const std::string& key) const {
-  auto opt = vm[key];
+  const auto& opt = vm[key];
   if (opt.empty()) {
     std::cout << "Missing configuration variable " << key;
     auto const spec = config.find_nothrow(key, false);
