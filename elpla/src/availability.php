@@ -320,7 +320,7 @@ if ($Admin || !$Closed)
       echo '<th bgcolor="444444">'. "\xA";
     else
       echo '  <th bgcolor="AAAAAA">'. "\xA";
-    echo '  <div class="verticalText"><font face="Arial" size="-1"><b>',utf8_encode($Eltern[$i]),'</b></font></div></th>'. "\xA";
+    echo '  <div class="verticalText"><font face="Arial" size="-1"><b>',$Eltern[$i],'</b></font></div></th>'. "\xA";
   }
 }
 ?>
@@ -351,7 +351,7 @@ if ($Admin || !$Closed)
       if ($result != FALSE)
       {
         while($row = $result->fetch_assoc())
-          echo utf8_encode($Eltern_nach_ID[$row["Eltern_ID"]]);
+          echo $Eltern_nach_ID[$row["Eltern_ID"]];
 	$result->close();
       }
 
@@ -372,7 +372,7 @@ if ($Admin || !$Closed)
       if ($result != FALSE )
       {
         while($row = $result->fetch_assoc())
-          echo utf8_encode($Eltern_nach_ID[$row["Eltern_ID"]]);
+          echo $Eltern_nach_ID[$row["Eltern_ID"]];
 	$result->close();
       }
 
@@ -404,7 +404,7 @@ if ($Admin || !$Closed)
               echo '      <td bgcolor="444444">';
             else
               echo '      <td bgcolor="AAAAAA">';
-            echo '<img src="fueller.gif" title="',utf8_encode($Grund),'" width="32" height="18"></td>'. "\xA";
+            echo '<img src="fueller.gif" title="',$Grund,'" width="32" height="18"></td>'. "\xA";
           }
 	  else
 	  {
