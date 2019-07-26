@@ -30,7 +30,7 @@ WORKDIR /home/elpla
 
 COPY statics statics
 
-RUN mkdir -p .elpla statics/resources/themes/bootstrap presence holidays statistics
+RUN mkdir -p .elpla statics/resources/themes/bootstrap presence holidays statistics && chown -R elpla: .elpla *
 
 COPY --chown=elpla configs/elpla/* .elpla/
 
