@@ -71,10 +71,27 @@ bool notifier::enqueue_email
       attachments.push_back(create_icalendar_file(shift));
 
   if (m_dry) {
-    std::cout << "Eid: " << eltern.id() << std::endl
-              << "Subject: " << email_subject << std::endl
-              << "To: " << eltern.email_mother() << ", " << eltern.email_father() << std::endl
-              << text << std::endl << std::endl;
+    std::cout << "Eid: "
+                    << eltern.id() << std::endl
+              << "From: '"
+                    << m_config.email_notifier_name << "' <" << m_config.email_notifier << ">"
+                    << std::endl
+              << "To: "
+                    << "'" << eltern.name_mother() << "' <" << eltern.email_mother() << ">"
+                    << ", "
+                    << "'" << eltern.name_father() << "' <" << eltern.email_father() << ">"
+                    << std::endl
+              << "Subject: "
+                    << email_subject
+                    << std::endl
+              << text
+              << std::endl << std::endl;
+
+    size_t attachments_size = attachments.size();
+    for (size_t i = 0; i < attachments_size; ++i) {
+      std::cout << "Attachment [" << i << "]: " << attachments[i] << std::endl;
+    }
+    std::cout << std::endl;
     return true;
   }
 

@@ -125,7 +125,6 @@ void notify_parents(const parent_list& parents, const shift_list& shift_assignat
   target_month = target_month.end_of_month();
   boost::gregorian::date start_next_month(target_month.year(), target_month.month(), 1);
   boost::gregorian::date_period month_period(start_next_month, target_month);
-  month_period.shift(boost::gregorian::days(1)); //The last day is not considered part of the period
 
   //Initialize notifier
   notifier notifier(config, dry);
