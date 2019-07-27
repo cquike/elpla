@@ -46,6 +46,8 @@ ed_config::ed_config() :
     ("database.mysql.database", po::value<std::string>(), "mysql database")
     ("notify.mail.notifier", po::value<std::string>(),
      "email address which sends notifications")
+    ("notify.mail.notifier.name", po::value<std::string>()->default_value(""),
+     "name for the email address which sends notifications")
     ("notify.mail.smtp.server", po::value<std::string>(),
      "SMTP server for the email account that sends notifications")
     ("notify.mail.smtp.user", po::value<std::string>(),
@@ -144,6 +146,11 @@ ed_config::ed_config() :
 	                        std::istreambuf_iterator<char>());
 
   email_notifier = get<std::string>("notify.mail.notifier");
+
+  email_notifier_name = get<std::string>("notify.mail.notifier.name");
+  if (email_notifier_name.empty()) {
+    email_notifier_name = email_notifier;
+  }
 
   smtp_server = get<std::string>("notify.mail.smtp.server");
 

@@ -29,6 +29,8 @@ public:
 
   std::string email_notifier;
 
+  std::string email_notifier_name;
+
   std::string smtp_server;
 
   std::string smtp_user;

@@ -217,7 +217,8 @@ bool notifier::send_smtp(std::vector<std::string>& email_to,
   {
     vmime::messageBuilder mb;
 
-    mb.setExpeditor(vmime::mailbox(m_config.email_notifier));
+    mb.setExpeditor(vmime::mailbox(vmime::text(m_config.email_notifier_name),
+                                   m_config.email_notifier));
 
     vmime::addressList to;
     for(auto& address_to : email_to)
