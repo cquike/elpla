@@ -66,6 +66,35 @@ function Nullen($Zahl, $AnzahlNullen)
   return $Temp;
 }
 
+$ClosedUntil = null;
+$mysqli->real_query("SELECT VALUE FROM state WHERE ID = 'ClosedUntil'");
+if ($result = $mysqli->use_result())
+{
+  if ($row = $result->fetch_row())
+  {
+    $ClosedUntil = new DateTime($row[0]);
+  }
+  $result->close();
+}
+if ($ClosedUntil === null)
+{
+  throw new Exception("cannot find ClosedUntil");
+}
+$OpenedUntil = null;
+$mysqli->real_query("SELECT VALUE FROM state WHERE ID = 'OpenedUntil'");
+if ($result = $mysqli->use_result())
+{
+  if ($row = $result->fetch_row())
+  {
+    $OpenedUntil = new DateTime($row[0]);
+  }
+  $result->close();
+}
+if ($OpenedUntil === null)
+{
+  throw new Exception("cannot find OpenedUntil");
+}
+
 //Startdatum auf den naechsten Monatsersten setzen
 $Startdatum=new DateTime("first day of next month");
 if (array_key_exists('SD',$_GET))
@@ -75,13 +104,11 @@ if (array_key_exists('SD',$_GET))
     $Startdatum= new DateTime($_GET["SD"]);
   }
 }
-$ClosedUntil=new DateTime("31.07.2019"); // TODO new query
 $Closed=false;
 if ($Startdatum < $ClosedUntil)
 {
   $Closed=true;
 }
-$OpenedUntil= new DateTime("30.09.2019"); // TODO new query
 
 $Prevmonth = clone $Startdatum;
 $Prevmonth->sub(new DateInterval("P1M"));

@@ -21,8 +21,9 @@ class notifier
 
   ~notifier();
 
-  bool enqueue_email(email_type type, 
-                     boost::gregorian::date date, 
+  bool enqueue_email(email_type type,
+                     boost::gregorian::date title_date,
+                     boost::gregorian::date opened_deadline,
                      const eltern& eltern, 
                      const std::string& body_text,
                      const std::string& subject,

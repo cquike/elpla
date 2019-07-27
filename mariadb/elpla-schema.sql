@@ -55,4 +55,14 @@ CREATE TABLE `schliesstage` (
   `Anlass` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `state` (
+  `ID` char(32) NOT NULL,
+  `Value` text NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `state` VALUES('ClosedUntil', '2019-08-31');
+INSERT INTO `state` VALUES('OpenedDeadline', '2019-08-09');
+INSERT INTO `state` VALUES('OpenedUntil', '2019-09-30');
+
 /*!40101 SET character_set_client = @saved_cs_client */;

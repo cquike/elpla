@@ -17,7 +17,7 @@ ed_presence_SOURCES = ed_presence.cpp
 
 ed_statistics_SOURCES = ed_statistics.cpp
 
-libed_la_SOURCES = eltern.cpp parent_list.cpp ed_config.cpp notifier.cpp shift.cpp shift_list.cpp befreiung.cpp waiver_list.cpp closing_day.cpp closing_days.cpp
+libed_la_SOURCES = eltern.cpp parent_list.cpp ed_config.cpp notifier.cpp shift.cpp shift_list.cpp befreiung.cpp waiver_list.cpp closing_day.cpp closing_days.cpp ed_state.cpp
 
 ed_notify_LDFLAGS = -pthread
 ed_notify_LDADD = -lcppdb -lboost_program_options -lboost_date_time -lncurses -lvmime -lgsasl -lgnutls -lgsasl $(LIBED)

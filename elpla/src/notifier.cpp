@@ -31,8 +31,9 @@ notifier::~notifier()
 }
 
 bool notifier::enqueue_email
-(email_type type, 
- boost::gregorian::date date, 
+(email_type type,
+ boost::gregorian::date title_date,
+ boost::gregorian::date opened_deadline,
  const eltern& eltern, 
  const std::string& body_text,
  const std::string& subject,
@@ -45,13 +46,11 @@ bool notifier::enqueue_email
   std::vector<std::string> email_to;
   std::vector<std::string> email_cc;
   char month_c[100];
-  std::tm date_tm = boost::gregorian::to_tm(date);
+  std::tm date_tm = boost::gregorian::to_tm(title_date);
   std::strftime(month_c, 99, "%B %Y", &date_tm);
   std::string email_subject;
   if (!subject.empty()) {
     email_subject = subject;
-  } else if (type == email_assign) {
-    email_subject = std::string("Elterndienste ") + month_c;
   } else {
     email_subject = std::string("Elterndienste ") + month_c;
   }

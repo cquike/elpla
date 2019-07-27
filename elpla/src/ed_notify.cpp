@@ -6,11 +6,12 @@
 #include "shift_list.h"
 #include "notifier.h"
 #include "email_type.h"
+#include "ed_state.h"
 
 //TODO: i18n
 
 void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, 
-		    std::string& email_body_template, const std::string& subject, bool dry, const ed_config& config);
+		    std::string& email_body_template, const std::string& subject, bool dry, const ed_config& config, const ed_state& st);
 
 int main(int argc, char *argv[])
 {
@@ -74,8 +75,10 @@ int main(int argc, char *argv[])
     //Read everything from database
     parent_list parents;
     shift_list shift_assignations;
+    ed_state state;
     from_db(parents, config.db_connection);
     from_db(shift_assignations, config.db_connection);
+    from_db(state, config.db_connection);
 
     if(vm.count("eid"))
     {
@@ -100,7 +103,7 @@ int main(int argc, char *argv[])
     else if(etype==email_assign)
       body_text_template=config.assignment_text;
     std::string subject = vm.count("subject") ? vm["subject"].as<std::string>() : "";
-    notify_parents(parents, shift_assignations, etype, body_text_template, subject, vm.count("dry")>0, config);
+    notify_parents(parents, shift_assignations, etype, body_text_template, subject, vm.count("dry")>0, config, state);
   }
   catch(std::exception& e) 
   {
@@ -110,21 +113,39 @@ int main(int argc, char *argv[])
   catch(...) 
   {
     std::cerr << "Exception of unknown type!\n";
+    return 2;
   }
 }
 
-void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, std::string& email_body_template, const std::string& subject, bool dry, const ed_config& config)
+void notify_parents(const parent_list& parents, const shift_list& shift_assignations, email_type etype, std::string& email_body_template, const std::string& subject, bool dry, const ed_config& config, const ed_state& state)
 {
-  //Get the date
-  boost::gregorian::date current_month = boost::gregorian::day_clock::local_day();
+  boost::gregorian::date today = boost::gregorian::day_clock::local_day();
+
+  boost::gregorian::date closed_until = state.closed_until;
+  boost::gregorian::date opened_deadline = state.opened_deadline;
+  boost::gregorian::date opened_until = state.opened_until;
+
   boost::gregorian::date target_month;
   if(etype == email_avail)
-    target_month = current_month + boost::gregorian::weeks(4); //TODO: base this on a database of closed/open months
+  {
+    // requesting availability starting from the first open date, i.e. the day after closed_until
+    target_month = closed_until + boost::gregorian::days(1);
+    if (opened_deadline <= today)
+    {
+      throw std::runtime_error("Opened deadline is already elapsed!");
+    }
+    if (opened_until < today)
+    {
+      throw std::runtime_error("Today is not yet open!");
+    }
+  }
   else
-    target_month = current_month + boost::gregorian::weeks(2);
-  target_month = target_month.end_of_month();
-  boost::gregorian::date start_next_month(target_month.year(), target_month.month(), 1);
-  boost::gregorian::date_period month_period(start_next_month, target_month);
+  {
+    // assigning the month in which closed_until fall
+    target_month = boost::gregorian::date(closed_until.year(), closed_until.month(), 1);
+  }
+
+  boost::gregorian::date_period shifts_period(target_month, closed_until);
 
   //Initialize notifier
   notifier notifier(config, dry);
@@ -135,16 +156,18 @@ void notify_parents(const parent_list& parents, const shift_list& shift_assignat
     if(parent.second.is_member_at(target_month))
     {
       shift_list this_parent_shifts;
-      auto select_shifts = [&parent, &this_parent_shifts, &month_period](const shift& this_shift) 
+      auto select_shifts = [&parent, &this_parent_shifts, &shifts_period](const shift& this_shift)
                            {
-                             if(this_shift.parent_id() == parent.first && month_period.contains(this_shift.when()))
+                             if(this_shift.parent_id() == parent.first && shifts_period.contains(this_shift.when()))
                                this_parent_shifts.push_back(this_shift);
                              return;
                            }; 
       std::for_each(shift_assignations.begin(), shift_assignations.end(), select_shifts);
 
       std::cout<<" Queueing email to "<<parent.second.name_kid()<<std::endl;
-      notifier.enqueue_email(etype, target_month, parent.second, email_body_template, subject, this_parent_shifts);
+      notifier.enqueue_email(etype,
+                             target_month, opened_deadline,
+                             parent.second, email_body_template, subject, this_parent_shifts);
     } 
  }
 
