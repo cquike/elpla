@@ -47,7 +47,10 @@ bool notifier::enqueue_email
   std::vector<std::string> email_cc;
   char month_c[100];
   std::tm date_tm = boost::gregorian::to_tm(title_date);
-  std::strftime(month_c, 99, "%B %Y", &date_tm);
+  std::strftime(month_c, sizeof(month_c)-1, "%B %Y", &date_tm);
+  char deadline_c[100];
+  std::tm deadline_tm = boost::gregorian::to_tm(opened_deadline);
+  std::strftime(deadline_c, sizeof(deadline_c)-1, "%d.%m.%Y", &deadline_tm);
   std::string email_subject;
   if (!subject.empty()) {
     email_subject = subject;
@@ -60,6 +63,7 @@ bool notifier::enqueue_email
   text = std::regex_replace(text, std::regex("\\$Passwort"), eltern.password());
   text = std::regex_replace(text, std::regex("\\$SystemUrl"), m_config.system_url);
   text = std::regex_replace(text, std::regex("\\$SystemMainteners"), m_config.system_mainteners);
+  text = std::regex_replace(text, std::regex("\\$OpenedDeadline"), deadline_c);
   email_to.push_back(eltern.email_mother());
   email_to.push_back(eltern.email_father());
   email_cc.push_back(m_config.email_notifier);

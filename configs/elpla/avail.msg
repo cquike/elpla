@@ -1,7 +1,7 @@
 Liebe $Name_Mutter, lieber $Name_Vater,
 
 
-bitte tragt eure Verfügbarkeit für Elterndienste im kommenden Monat bis 28.08.2019 ein. Dazu steht euch folgender Link zur Verfügung:
+bitte tragt eure Verfügbarkeit für Elterndienste im kommenden Monat bis $OpenedDeadline ein. Dazu steht euch folgender Link zur Verfügung:
 
 $SystemUrl/?PW=$Passwort
 
